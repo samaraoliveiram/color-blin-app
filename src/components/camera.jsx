@@ -1,57 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect } from "react";
+import { VideoContext } from "./Video";
 
-const Camera = () => {
-  //const [cameras, setCameras] = useState([]);
-  const [stream, setStream] = useState(null);
-  const videoRef = useRef(null);
-
+const WebCamSourceR = ({ videoRef }) => {
   useEffect(() => {
-    (async () => {
-      const devices = await window.navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices
-        .filter(device => device.kind === "videoinput")
-        .map((device, index) => ({
-          id: device.deviceId,
-          label: device.label || "Video" + index + 1
-        }));
-
-      const hasOnlyOneCamera = videoDevices.length === 1;
-      const hasOlderSpec = !("getSettings" in MediaStreamTrack.prototype);
-
-      let constraints;
-
-      if (hasOnlyOneCamera || hasOlderSpec) {
-        constraints = {
-          deviceId: {
-            exact: videoDevices[0].id
-          }
-        };
-      } else {
-        constraints = {
-          facingMode: {
-            exact: "environment"
-          }
-        };
-      }
-
-      let stream = await navigator.mediaDevices.getUserMedia({
-        video: constraints
+    navigator.mediaDevices &&
+      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
       });
-      setStream(stream);
-    })();
-  }, []);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (stream && video.srcObject !== stream) {
-      video.srcObject = stream;
-      video.onloadedmetadata = function(e) {
-        video.play();
-      };
-    }
-  }, [stream]);
-
-  return <video playsInline ref={videoRef} />;
+  }, [videoRef]);
+  return null;
 };
 
-export default Camera;
+export const Camera = () => (
+  <VideoContext.Consumer>
+    {videoRef => <WebCamSourceR videoRef={videoRef} />}
+  </VideoContext.Consumer>
+);

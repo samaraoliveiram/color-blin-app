@@ -1,11 +1,8 @@
 import React from "react";
 import { Shaders, Node, GLSL } from "gl-react";
-import { Surface } from "gl-react-dom";
-import colorScales from "../filter/shader/colorblind.frag";
-export { colorScales };
 
 const shaders = Shaders.create({
-  colorify: {
+  normalize: {
     frag: GLSL`
 precision highp float;
 varying vec2 uv;
@@ -19,12 +16,10 @@ void main() {
   }
 });
 
-const Colorify = () => {
-  return (
-    <Surface width={400} height={300}>
-      <Node shader={shaders.colorify} />
-    </Surface>
-  );
-};
-
-export default Colorify;
+export const Normalize = ({ children, colorScale, interpolation }) => (
+  <Node
+    shader={shaders.normalize}
+    uniformsOptions={{ colorScale: { interpolation } }}
+    uniforms={{ colorScale, children }}
+  />
+);
