@@ -4,41 +4,94 @@ import { Shaders, Node, GLSL } from "gl-react";
 const shaders = Shaders.create({
   normalize: {
     frag: GLSL`
-// precision highp float;
 precision mediump float;
 
 varying vec2 uv;
 
 uniform sampler2D children;
+uniform int cbtype;
 
 void main(void) {
-  vec4 c = texture2D(children, uv);
+  vec4 color = texture2D(children, uv);
 
-  const mat3 RGBtoOpponentMat = mat3(0.2814, -0.0971, -0.0930, 0.6938, 0.1458,-0.2529, 0.0638, -0.0250, 0.4665);
-  const mat3 OpponentToRGBMat = mat3(1.1677, 0.9014, 0.7214, -6.4315, 2.5970, 0.1257, -0.5044, 0.0159, 2.0517);
+  //No change, skip the rest
+  if (cbtype == 0) {
+    gl_FragColor = color;
+    return;
+  }
 
-  vec4 fragColor = texture2D(children, uv);
+  // RGB to LMS matrix conversion
+  const mat3 RGBLMS = mat3(  
+    17.8824, 43.5161, 4.11935, 
+    3.45565, 27.1554, 3.86714, 
+    0.0299566, 0.184309, 1.46709 
+  );
 
-  // Protanotopia
-  // vec3 opponentColor = RGBtoOpponentMat * vec3(fragColor.r, fragColor.g, fragColor.b);
-  // opponentColor.x -= opponentColor.y * 1.5;
-  // vec3 rgbColor = OpponentToRGBMat * opponentColor;
-  // fragColor = vec4(rgbColor.r, rgbColor.g, rgbColor.b, fragColor.a);
+  vec3 LMS = color.rgb * RGBLMS;
+  vec3 lms = vec3(0.0,0.0,0.0);
 
-  // TRITANOTOPIA
-  vec3 opponentColor = RGBtoOpponentMat * vec3(fragColor.r, fragColor.g, fragColor.b);
-  opponentColor.x -= ((3 * opponentColor.z) - opponentColor.y) * 0.25;               
-  vec3 rgbColor = OpponentToRGBMat * opponentColor;                                  
-  fragColor = vec4(rgbColor.r, rgbColor.g, rgbColor.b, fragColor.a);   
+  //Protanope
+  if (cbtype == 1) {
+    lms = vec3(      
+      (2.02344 * LMS.g) + (-2.52581 * LMS.b), 
+      LMS.g, 
+      LMS.b 
+    );
+  }
 
-  gl_FragColor = fragColor;
+  //Deuteranope
+  if (cbtype == 2) {
+    lms = vec3(      
+      LMS.r, 
+      (0.494207 * LMS.r) + (1.24827 * LMS.b), 
+      LMS.b 
+    );
+  }
 
-  // gl_FragColor = vec4( c2.x , c2.y, c2.z, 1.0 );
+  //Tritanope
+  if (cbtype == 3) {
+    lms = vec3(      
+      LMS.r, 
+      LMS.g, 
+      (-0.395913 * LMS.r) + (0.801109 * LMS.g) 
+    );
+  }
+
+  // LMS to RGB matrix operation
+  const mat3 LMSRGB = mat3(     
+    0.0809444479, -0.130504409, 0.116721066, 
+    -0.0102485335, 0.0540193266, -0.113614708, 
+    -0.000365296938, -0.00412161469, 0.693511405 
+  );
+
+  vec3 RGB = lms * LMSRGB;
+
+  // Colour shift
+  // values may go over 1.0 but will get automatically clamped on output 
+  RGB.rgb = color.rgb - RGB.rgb;
+  RGB.g = 0.7*RGB.r + RGB.g;
+  RGB.b = 0.7*RGB.r + RGB.b;
+  color.rgb = color.rgb + RGB.rgb;
+
+  //Output
+  gl_FragColor = color;
 }
 `
   }
 });
 
+const Modes = {
+  NORMAL: 0,
+  PROTANOPE: 1,
+  DEUTERANOPE: 2,
+  TRITANOPE: 3
+};
+
 export const Normalize = ({ children }) => (
-  <Node shader={shaders.normalize} uniforms={{ children }} />
+  <Node
+    shader={shaders.normalize}
+    uniforms={{ children, cbtype: Modes.TRITANOPE }}
+  />
 );
+
+// shader van damme https://www.shadertoy.com/view/XdtyzM
