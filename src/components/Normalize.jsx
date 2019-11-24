@@ -1,25 +1,21 @@
 import React from "react";
-import { Shaders, Node, GLSL } from "gl-react";
+import { Shaders, Node } from "gl-react";
+import { frag } from "./daltonize-shader";
 
 const shaders = Shaders.create({
-  normalize: {
-    frag: GLSL`
-precision highp float;
-varying vec2 uv;
-uniform sampler2D children, colorScale;
-float greyscale (vec3 c) { return 0.2125 * c.r + 0.7154 * c.g + 0.0721 * c.b; }
-void main() {
-  vec4 original = texture2D(children, uv);
-  vec4 newcolor = texture2D(colorScale, vec2(greyscale(original.rgb), 0.5));
-  gl_FragColor = vec4(newcolor.rgb, original.a * newcolor.a);
-}`
-  }
+  normalize: { frag }
 });
 
-export const Normalize = ({ children, colorScale, interpolation }) => (
+const Modes = {
+  NORMAL: 0,
+  PROTANOPE: 1,
+  DEUTERANOPE: 2,
+  TRITANOPE: 3
+};
+
+export const Normalize = ({ children, intensity }) => (
   <Node
     shader={shaders.normalize}
-    uniformsOptions={{ colorScale: { interpolation } }}
-    uniforms={{ colorScale, children }}
+    uniforms={{ children, cbtype: Modes.PROTANOPE, intensity }}
   />
 );

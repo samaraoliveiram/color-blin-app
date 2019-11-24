@@ -2,7 +2,7 @@ import React from "react";
 import "./App.css";
 import { Surface } from "gl-react-dom";
 import { Normalize } from "./components/Normalize";
-import { Protanopia } from "./components/ColorScale";
+// import { Protanopia } from "./components/ColorScale";
 import { Video } from "./components/Video";
 import { Camera } from "./components/Camera";
 
@@ -11,7 +11,7 @@ function App() {
     <>
       <h1>dsfsfsd</h1>
       <Surface width={480} height={360}>
-        <Normalize colorScale={Protanopia} interpolation="linear">
+        <Normalize intensity={1.3}>
           {redraw => (
             <Video onFrame={redraw} autoPlay>
               <Camera></Camera>
