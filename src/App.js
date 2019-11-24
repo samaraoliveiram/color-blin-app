@@ -11,7 +11,7 @@ function App() {
     <>
       <h1>dsfsfsd</h1>
       <Surface width={480} height={360}>
-        <Normalize>
+        <Normalize intensity={1.3}>
           {redraw => (
             <Video onFrame={redraw} autoPlay>
               <Camera></Camera>
