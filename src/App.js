@@ -1,25 +1,15 @@
-import React from "react";
 import "./App.css";
-import { Surface } from "gl-react-dom";
-import { Normalize } from "./components/Normalize";
-// import { Protanopia } from "./components/ColorScale";
-import { Video } from "./components/Video";
-import { Camera } from "./components/Camera";
+import React from "react";
+import { PrimaryScreen } from "./components/PrimaryScreen";
+import { TestScreen } from "./components/TestScreen";
+import { Router } from "@reach/router";
 
 function App() {
   return (
-    <>
-      <h1>dsfsfsd</h1>
-      <Surface width={480} height={360}>
-        <Normalize intensity={1.3}>
-          {redraw => (
-            <Video onFrame={redraw} autoPlay>
-              <Camera></Camera>
-            </Video>
-          )}
-        </Normalize>
-      </Surface>
-    </>
+    <Router>
+      <PrimaryScreen path="/" />
+      <TestScreen path="/test" />
+    </Router>
   );
 }
 

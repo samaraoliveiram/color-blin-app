@@ -6,16 +6,16 @@ const shaders = Shaders.create({
   normalize: { frag }
 });
 
-const Modes = {
-  NORMAL: 0,
-  PROTANOPE: 1,
-  DEUTERANOPE: 2,
-  TRITANOPE: 3
-};
+// const Modes = {
+//   NORMAL: 0,
+//   PROTANOPE: 1,
+//   DEUTERANOPE: 2,
+//   TRITANOPE: 3
+// };
 
-export const Normalize = ({ children, intensity }) => (
+export const Normalize = ({ children, intensity, filter }) => (
   <Node
     shader={shaders.normalize}
-    uniforms={{ children, cbtype: Modes.PROTANOPE, intensity }}
+    uniforms={{ children, cbtype: filter, intensity }}
   />
 );

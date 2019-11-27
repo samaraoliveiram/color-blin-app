@@ -49,23 +49,23 @@ void main(void) {
     );
   }
 
-  // //Deuteranope
-  // if (cbtype == 2) {
-  //   def_lms = vec3(      
-  //     LMS.r, 
-  //     (0.494207 * LMS.r) + (1.24827 * LMS.b), 
-  //     LMS.b 
-  //   );
-  // }
+  //Deuteranope
+  if (cbtype == 2) {
+    def_lms = mat3(      
+      1, 0, 0, 
+      0.494207, 0, 1.24827, 
+      0, 0, 1
+    );
+  }
 
-  // //Tritanope
-  // if (cbtype == 3) {
-  //   def_lms = vec3(      
-  //     LMS.r, 
-  //     LMS.g, 
-  //     (-0.395913 * LMS.r) + (0.801109 * LMS.g) 
-  //   );
-  // }
+  //Tritanope
+  if (cbtype == 3) {
+    def_lms = mat3(      
+      1, 0, 0,
+      0, 1, 0, 
+      -0.395913, 0.801109, 0
+    );
+  }
 
 
   vec3 original_lms = color.rgb * RGBLMS;
@@ -78,8 +78,8 @@ void main(void) {
     0.7, 0, 1
   );
 
-  // rgb - sim_rgb contains the color information that dichromats
-  // cannot see. err2mod rotates this to a part of the spectrum that
+  // color.rgb - sim_rgb contains the color information that dichromats
+  // cannot see. err rotates this to a part of the spectrum that
   // they can see.
   vec3 ratio = vec3(intensity, intensity, intensity);
   vec3 color_diff = color.rgb - sim_rgb;
