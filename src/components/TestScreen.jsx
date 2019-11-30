@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import { questions } from "./questions";
 
-import { Card, Button } from "antd";
-import { Typography } from "antd";
+import { navigate } from "@reach/router";
 
-function redirect() {
-  window.redirect("/");
-}
+import { Card, Button, Form } from "antd";
+import { Typography } from "antd";
 
 const { Title } = Typography;
 const { Text } = Typography;
@@ -31,8 +29,6 @@ export const TestScreen = () => {
     I: 0
   });
 
-  console.log(points);
-
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState("");
 
@@ -40,41 +36,49 @@ export const TestScreen = () => {
   const options = question.options;
   const total = questions.length;
 
+  console.log(index + 1);
+  console.log(total);
   return (
     <>
-      <Title>Selecione uma resposta</Title>
-      <Text>
-        {index}/{total}
-      </Text>
-      <Card
-        style={{ width: "50%" }}
-        cover={<img alt="example" width="120" src={`/${question.img}`} />}
-      >
-        {options.map((option, i) => (
-          <Card.Grid
-            key={option.value}
-            hoverable={answer === i ? false : true}
-            style={answer === i ? cardSelected : cardStyle}
-            onClick={() => setAnswer(i)}
-          >
-            {option.value}
-          </Card.Grid>
-        ))}
-        <Button
-          onClick={
-            index > total
-              ? redirect
-              : () => {
-                  const type = options[answer].type;
-                  setIndex(index + 1);
-                  setPoints({ ...points, [type]: points[type] + 1 });
-                  setAnswer("");
-                }
-          }
+      <Form onSubmit={() => navigate("/")}>
+        <Title>Selecione uma resposta</Title>
+        <Text>
+          {index + 1}/{total}
+        </Text>
+        <Card
+          style={{ width: "50%" }}
+          cover={<img alt="example" width="120" src={`/${question.img}`} />}
         >
-          {index === total ? "Resultado" : "Próximo"}
-        </Button>
-      </Card>
+          {options.map((option, i) => (
+            <Card.Grid
+              key={option.value}
+              hoverable={answer === i ? false : true}
+              style={answer === i ? cardSelected : cardStyle}
+              onClick={() => setAnswer(i)}
+            >
+              {option.value}
+            </Card.Grid>
+          ))}
+          <Button
+            onClick={() => {
+              if (answer === null) {
+                return window.alert("Selecione uma resposta");
+              }
+              const type = options[answer].type;
+              setIndex(index + 1);
+              type.map(value =>
+                setPoints({
+                  ...points,
+                  [value]: points[value] + 1
+                })
+              );
+              setAnswer("");
+            }}
+          >
+            Próximo
+          </Button>
+        </Card>
+      </Form>
     </>
   );
 };
